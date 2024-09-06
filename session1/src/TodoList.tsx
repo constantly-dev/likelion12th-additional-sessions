@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Todo from './Todo';
 
-const TodoList = () => {
-  const [todoList, setTodoList] = useState<any[]>([]);
-  const [plusTodo, setPlusTodo] = useState<any>('');
-  const [name, setName] = useState<any>('');
+// TodoItem interface로 구현
 
+const TodoList = () => {
+  const [todoList, setTodoList] = useState<TodoItem[]>([]);
+  const [plusTodo, setPlusTodo] = useState<any>('');
+  const [priority, setPriority] = useState<any>(1);
+  const [name, setName] = useState<any>('');
+  
   useEffect(() => {
     const storedName = localStorage.getItem('name');
     if (storedName) {
@@ -19,17 +22,22 @@ const TodoList = () => {
     if (plusTodo.trim() === '') {
       return;
     }
-    setTodoList((prev: any) => [...prev, plusTodo]);
+    setTodoList((prev) => [...prev, { text: plusTodo, priority }]);
     setPlusTodo('');
+    setPriority(1);
   };
 
   const handleTodoChange = (e: any) => {
     setPlusTodo(e.target.value);
   };
 
+  const handlePriorityChange = (e: any) => {
+    setPriority(parseInt(e.target.value, 10));
+  };
+
   return (
     <>
-      <TodoForm>
+      <TodoForm onSubmit={registerTodo}>
         <Wrapper>
           <h3>TodoList</h3>
 
@@ -39,11 +47,16 @@ const TodoList = () => {
               placeholder="할 일을 입력해주세요."
               onChange={handleTodoChange}
             />
-            <RegisterButton onClick={registerTodo}>추가</RegisterButton>
+            <PrioritySelect value={priority} onChange={handlePriorityChange}>
+              <option value={1}>낮음</option>
+              <option value={2}>중간</option>
+              <option value={3}>높음</option>
+            </PrioritySelect>
+            <RegisterButton type="submit">추가</RegisterButton>
           </InputContainer>
           <ContentContainer>
-            {todoList.map((todo: any, index: any) => (
-              <Todo key={index} todo={todo}></Todo>
+            {todoList.map((todo, index) => (
+              <Todo key={index} todo={todo} />
             ))}
           </ContentContainer>
           <Info>이름: {name}</Info>
@@ -69,6 +82,7 @@ const InputContainer = styled.div`
   display: flex;
   align-items: center;
 `;
+
 const ContentContainer = styled.div`
   width: 100%;
   overflow-y: scroll;
@@ -86,6 +100,7 @@ const ContentContainer = styled.div`
 `;
 
 const TodoForm = styled.form``;
+
 const TodoInput = styled.input`
   width: 100%;
   padding: 16px;
@@ -95,8 +110,17 @@ const TodoInput = styled.input`
   padding-right: 50px;
   height: inherit;
 `;
+
+const PrioritySelect = styled.select`
+  margin-left: 10px;
+  padding: 5px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+`;
+
 const RegisterButton = styled.button`
   white-space: nowrap;
+  margin-left: 10px;
 `;
 
 const Info = styled.p`
